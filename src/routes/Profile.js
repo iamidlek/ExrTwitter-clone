@@ -1,10 +1,10 @@
-import { authService } from "fbase";
+import { signOut, getAuth } from "firebase/auth";
 import { useHistory } from "react-router-dom";
 
-export default () => {
+const Profile = () => {
   const history = useHistory();
   const onLogOutClick = () => {
-    authService.signOut();
+    signOut(getAuth());
     history.push("/");
   };
   return (
@@ -13,3 +13,4 @@ export default () => {
     </>
   );
 };
+export default Profile;
