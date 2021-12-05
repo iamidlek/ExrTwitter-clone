@@ -1,10 +1,11 @@
 import { signOut, getAuth } from "firebase/auth";
 import { useHistory } from "react-router-dom";
 
-const Profile = () => {
+const Profile = ({ setUserObj }) => {
   const history = useHistory();
   const onLogOutClick = () => {
     signOut(getAuth());
+    setUserObj(null);
     history.push("/");
   };
   return (
