@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { dbService } from "fbase";
+import { v4 as uuidv4 } from "uuid";
+import { dbService, storageService } from "fbase";
+import { ref, uploadString, getDownloadURL } from "firebase/storage";
 import {
   collection,
   addDoc,
@@ -17,14 +19,31 @@ const Home = ({ userObj }) => {
   const imgFileInput = useRef();
   const onSubmit = async (event) => {
     event.preventDefault();
+
+    let attachmentUrl = "";
+    if (attachment !== "") {
+      // 유저 아이디로 폴더 구분 / 파일 이름(npm i uuid)
+      // 파일에 대한 ref를 가지게 된다
+      const fileRef = ref(storageService, `${userObj.uid}/${uuidv4()}`);
+      // data_url : 포멧명
+      const response = await uploadString(fileRef, attachment, "data_url");
+      // response 에서 해당 파일의 주소 정보를 찾을 수 있다
+      // console.log(response);
+      //storage에 있는 파일 URL로 다운로드 받기
+      attachmentUrl = await getDownloadURL(response.ref);
+      console.log(attachmentUrl);
+    }
     // nweets컬렉션 추가
-    await addDoc(collection(dbService, "nweets"), {
-      text: nweet,
+    const nweetPosting = {
+      nweet,
       createdAt: serverTimestamp(),
       creatorId: userObj.uid,
-    });
-
+      attachmentUrl,
+    };
+    await addDoc(collection(dbService, "nweets"), nweetPosting);
     setNweet("");
+    setAttachment("");
+    imgFileInput.current.value = null;
   };
   const onChange = (event) => {
     const {
