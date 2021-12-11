@@ -1,15 +1,15 @@
 import { signOut, getAuth, updateProfile } from "firebase/auth";
 import { useHistory } from "react-router-dom";
-// import { dbService,authService } from "fbase";
+// import { authService } from "fbase";
 // import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
 import { useState } from "react";
 
-const Profile = ({ setUserObj, userObj }) => {
+const Profile = ({ refreshUser, userObj }) => {
   const history = useHistory();
   const [newDisplayName, setNewDisplayName] = useState(userObj.displayName);
-  const onLogOutClick = () => {
-    signOut(getAuth());
-    setUserObj(null);
+  const onLogOutClick = async () => {
+    await signOut(getAuth());
+    await refreshUser();
     history.push("/");
   };
 
@@ -22,7 +22,10 @@ const Profile = ({ setUserObj, userObj }) => {
   const onSubmit = async (event) => {
     event.preventDefault();
     if (userObj.displayName !== newDisplayName) {
-      await updateProfile(userObj, { displayName: newDisplayName });
+      await updateProfile(getAuth().currentUser, {
+        displayName: newDisplayName,
+      });
+      refreshUser();
     }
   };
 
@@ -43,18 +46,29 @@ const Profile = ({ setUserObj, userObj }) => {
   //   getMyNweets();
   // }, []);
   return (
-    <>
-      <form onSubmit={onSubmit}>
+    <div className="container">
+      <form onSubmit={onSubmit} className="profileForm">
         <input
           onChange={onChange}
           type="text"
+          autoFocus
           placeholder="Display name"
           value={newDisplayName}
+          className="formInput"
         />
-        <input type="submit" value="Update Profile" />
+        <input
+          type="submit"
+          value="Update Profile"
+          className="formBtn"
+          style={{
+            marginTop: 10,
+          }}
+        />
       </form>
-      <button onClick={onLogOutClick}>Log Out</button>
-    </>
+      <span className="formBtn cancelBtn logOut" onClick={onLogOutClick}>
+        Log Out
+      </span>
+    </div>
   );
 };
 export default Profile;
