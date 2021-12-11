@@ -13,18 +13,34 @@ function App() {
             displayName: "Not setted",
           });
         }
-        setUserObj(user);
+        setUserObj({
+          displayName: user.displayName,
+          uid: user.uid,
+        });
       }
       setInit(true);
     });
   }, []);
+  const refreshUser = () => {
+    // firebase에서 갱신된 (onAuthStateChanged)현 로그인 정보
+    const user = getAuth().currentUser;
+    if (user) {
+      setUserObj({
+        displayName: user.displayName,
+        uid: user.uid,
+      });
+    } else {
+      setUserObj(null);
+    }
+  };
   return (
     <>
       {init ? (
         <AppRouter
+          refreshUser={refreshUser}
           isLoggedIn={Boolean(userObj)}
           userObj={userObj}
-          setUserObj={setUserObj}
+          // setUserObj={setUserObj}
         />
       ) : (
         "Initializing..."
